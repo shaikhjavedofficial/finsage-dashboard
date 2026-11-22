@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Finsage · stock analysis</title>
+  <!-- Bootstrap 5 + icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <!-- custom subtle shadows, whites & dark blues -->
+  <style>
+    body {
+      background: #f0f4fc;
+      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    }
+    .card-shadow {
+      box-shadow: 0 12px 28px rgba(0, 20, 60, 0.08), 0 2px 8px rgba(0, 0, 0, 0.02);
+      border: none;
+      border-radius: 1.25rem;
+      background-color: #ffffff;
+    }
+    .header-finsage {
+      background: linear-gradient(135deg, #0b1d3a 0%, #122b4e 100%);
+      color: white;
+      border-radius: 1.5rem 1.5rem 0 0;
+      padding: 1.5rem 2rem;
+    }
+    .header-finsage h1 {
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      font-size: 2rem;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+    }
+    .header-finsage h1 i {
+      color: #7aa9ff;
+      font-size: 2rem;
+    }
+    .header-finsage .sub {
+      color: #b6c9e8;
+      font-size: 0.9rem;
+      margin-top: 0.25rem;
+      font-weight: 400;
+    }
+    .toggle-group {
+      background: #e8eef9;
+      border-radius: 3rem;
+      padding: 0.3rem;
+      display: inline-flex;
+      border: 1px solid #cdd9ed;
+    }
+    .toggle-btn {
+      border: none;
+      background: transparent;
+      padding: 0.55rem 1.8rem;
+      border-radius: 3rem;
+      font-weight: 500;
+      font-size: 0.95rem;
+      color: #1a2e4f;
+      transition: all 0.15s ease;
+    }
+    .toggle-btn.active {
+      background: #0b1d3a;
+      color: white;
+      box-shadow: 0 4px 10px rgba(11, 29, 58, 0.25);
+    }
+    .toggle-btn:not(.active):hover {
+      background: #d6e1f5;
+    }
+    .input-group-custom {
+      border-radius: 3rem;
+      overflow: hidden;
+      border: 1px solid #cfdff2;
+      background: white;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+    }
+    .input-group-custom .form-control {
+      border: none;
+      padding: 0.75rem 1.25rem;
+      font-size: 1rem;
+      background: transparent;
+    }
+    .input-group-custom .form-control:focus {
+      box-shadow: none;
+      background: white;
+    }
+    .input-group-custom .btn {
+      border-radius: 3rem;
+      padding: 0.6rem 2rem;
+      font-weight: 500;
+      background: #0b1d3a;
+      color: white;
+      border: none;
+      margin: 0.25rem;
+      transition: all 0.15s;
+    }
+    .input-group-custom .btn:hover {
+      background: #1a3a6b;
+    }
+    .data-box {
+      background: #ffffff;
+      border-radius: 1.25rem;
+      border: 1px solid #e3ebf7;
+      padding: 1.5rem 1.75rem;
+      box-shadow: inset 0 1px 4px rgba(0, 20, 50, 0.02);
+      transition: all 0.1s;
+    }
+    .badge-soft-blue {
+      background: #e8f0fe;
+      color: #0b2a5c;
+      font-weight: 500;
+      padding: 0.35rem 1rem;
+      border-radius: 3rem;
+      font-size: 0.8rem;
+    }
+    .stat-value {
+      font-weight: 600;
+      color: #0b1d3a;
+    }
+    .stat-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      color: #5f7a9e;
+      font-weight: 500;
+    }
+    .section-title {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-weight: 600;
+      color: #3f5e87;
+      margin-bottom: 1rem;
+      border-bottom: 2px solid #e6edf8;
+      padding-bottom: 0.5rem;
+    }
+    .soft-alert {
+      background: #f7faff;
+      border-left: 4px solid #0b1d3a;
+      border-radius: 0.75rem;
+      padding: 1rem 1.25rem;
+      color: #1e3452;
+      font-size: 0.9rem;
+    }
+    .signal-pill {
+      background: #eaf1fd;
+      padding: 0.3rem 1rem;
+      border-radius: 2rem;
+      color: #0b1d3a;
+      font-weight: 500;
+      font-size: 0.85rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    footer {
+      font-size: 0.75rem;
+      color: #7e95b0;
+    }
+    .loader {
+      display: inline-block;
+      width: 1rem;
+      height: 1rem;
+      border: 2px solid #ffffff70;
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 0.8s linear infinite;
+      margin-right: 0.5rem;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body class="d-flex align-items-center min-vh-100 py-4">
+  <div class="container" style="max-width: 1000px;">
+    <!-- main card -->
+    <div class="card card-shadow overflow-hidden">
+      <!-- header finsage -->
+      <div class="header-finsage">
+        <h1>
+          <i class="bi bi-graph-up-arrow"></i> Finsage
+        </h1>
+        <div class="sub">real‑time equity intelligence · ML powered</div>
+      </div>
+
+      <!-- controls -->
+      <div class="p-4 pb-2 bg-white">
+        <div class="d-flex flex-wrap align-items-center gap-3 mb-4">
+          <div class="toggle-group">
+            <button id="indianBtn" class="toggle-btn active" data-market="IN">
+              <i class="bi bi-currency-rupee me-1"></i> Indian stock
+            </button>
+            <button id="usBtn" class="toggle-btn" data-market="US">
+              <i class="bi bi-currency-dollar me-1"></i> US stock
+            </button>
+          </div>
+          <div class="text-muted small ms-auto">
+            <i class="bi bi-info-circle"></i> endpoint: /stock/{market}/{symbol}
+          </div>
+        </div>
+
+        <!-- search input + button -->
+        <div class="input-group-custom d-flex align-items-center w-100 mb-4">
+          <input id="symbolInput" type="text" class="form-control" placeholder="e.g. STLTECH, SONy, AAPL" value="STLTECH" aria-label="Stock symbol">
+          <button id="fetchBtn" class="btn d-flex align-items-center" type="button">
+            <i class="bi bi-search me-2"></i> Analyse
+          </button>
+        </div>
+      </div>
+
+      <!-- data area -->
+      <div class="px-4 pb-4 bg-white" id="dataContainer">
+        <!-- by default we show sample from the JSON, but dynamically loaded too -->
+        <div class="data-box" id="resultBox">
+          <!-- content will be replaced by JS, but initial static content for nicer preview -->
+          <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+            <div>
+              <span class="badge-soft-blue me-2" id="marketBadge">IN</span>
+              <span class="fw-bold fs-5" id="symbolDisplay">STLTECH</span>
+            </div>
+            <div class="signal-pill">
+              <i class="bi bi-activity"></i> <span id="recommendationDisplay">HOLD</span>
+            </div>
+          </div>
+
+          <!-- two columns of metrics -->
+          <div class="row g-3 mb-3">
+            <div class="col-6 col-md-3">
+              <div class="stat-label">Open</div>
+              <div class="stat-value" id="openVal">687.10</div>
+            </div>
+            <div class="col-6 col-md-3">
+              <div class="stat-label">High</div>
+              <div class="stat-value" id="highVal">702.00</div>
+            </div>
+            <div class="col-6 col-md-3">
+              <div class="stat-label">Low</div>
+              <div class="stat-value" id="lowVal">670.95</div>
+            </div>
+            <div class="col-6 col-md-3">
+              <div class="stat-label">Close</div>
+              <div class="stat-value" id="closeVal">670.95</div>
+            </div>
+          </div>
+
+          <!-- ML + fusion details -->
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <div class="section-title"><i class="bi bi-cpu me-1"></i> ML Prediction</div>
+              <div class="d-flex flex-wrap gap-3">
+                <div><span class="stat-label">Direction</span><br><span class="fw-semibold" id="mlDirection">Up</span></div>
+                <div><span class="stat-label">Confidence</span><br><span class="fw-semibold" id="mlConfidence">58.02%</span></div>
+                <div><span class="stat-label">Horizon</span><br><span class="fw-semibold" id="horizon">3 days</span></div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="section-title"><i class="bi bi-pie-chart me-1"></i> Fusion signal</div>
+              <div class="d-flex flex-wrap gap-3">
+                <div><span class="stat-label">Final prob.</span><br><span class="fw-semibold" id="finalProb">0.5562</span></div>
+                <div><span class="stat-label">Confidence</span><br><span class="fw-semibold" id="fusionConf">0.1123</span></div>
+                <div><span class="stat-label">Regime</span><br><span class="fw-semibold" id="regime">1</span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- agent analysis snippet -->
+          <div class="section-title"><i class="bi bi-robot me-1"></i> Agent analysis</div>
+          <div class="soft-alert mb-3" id="reasoningText">
+            The machine learning directional model indicates an upward trajectory with a moderate 58.02% confidence level. With zero news articles ... HOLD recommendation.
+          </div>
+          <div class="d-flex flex-wrap gap-3 mb-2 small">
+            <span class="badge-soft-blue"><i class="bi bi-bar-chart"></i> Technical: <span id="techSignal">UP</span></span>
+            <span class="badge-soft-blue"><i class="bi bi-newspaper"></i> News: <span id="newsSignal">NEUTRAL</span></span>
+            <span class="badge-soft-blue"><i class="bi bi-exclamation-triangle"></i> VIX: <span id="vixVal">17.42</span></span>
+          </div>
+          <div class="text-muted small mt-2" id="riskFlags">
+            Elevated volatility (India VIX at 17.42) and absence of near-term fundamental catalysts.
+          </div>
+        </div>
+      </div>
+
+      <!-- footer -->
+      <div class="px-4 pb-3 pt-2 bg-white d-flex justify-content-between align-items-center">
+        <footer>
+          <i class="bi bi-database"></i> model: v3.1_trio_ensemble_calibrated
+        </footer>
+        <footer id="timestampDisplay">2026-11-10T15:45:59Z</footer>
+      </div>
+    </div>
+  </div>
+
+  <!-- JS: market toggle + fetch logic -->
+  <script>
+    (function() {
+      // ---- state ----
+      let currentMarket = 'IN';   // 'IN' or 'US'
+      const indianBtn = document.getElementById('indianBtn');
+      const usBtn = document.getElementById('usBtn');
+      const symbolInput = document.getElementById('symbolInput');
+      const fetchBtn = document.getElementById('fetchBtn');
+      const marketBadge = document.getElementById('marketBadge');
+      const symbolDisplay = document.getElementById('symbolDisplay');
+
+      // DOM elements to update
+      const el = {
+        recommendation: document.getElementById('recommendationDisplay'),
+        open: document.getElementById('openVal'),
+        high: document.getElementById('highVal'),
+        low: document.getElementById('lowVal'),
+        close: document.getElementById('closeVal'),
+        mlDirection: document.getElementById('mlDirection'),
+        mlConfidence: document.getElementById('mlConfidence'),
+        horizon: document.getElementById('horizon'),
+        finalProb: document.getElementById('finalProb'),
+        fusionConf: document.getElementById('fusionConf'),
+        regime: document.getElementById('regime'),
+        reasoning: document.getElementById('reasoningText'),
+        techSignal: document.getElementById('techSignal'),
+        newsSignal: document.getElementById('newsSignal'),
+        vixVal: document.getElementById('vixVal'),
+        riskFlags: document.getElementById('riskFlags'),
+        timestamp: document.getElementById('timestampDisplay'),
+        marketBadge: marketBadge,
+        symbolDisplay: symbolDisplay
+      };
+
+      // helper to format number like 670.95 (two decimals)
+      const fmt2 = (num) => (num !== undefined && num !== null) ? Number(num).toFixed(2) : '—';
+
+      // ---- update market toggle UI ----
+      function setMarket(market) {
+        currentMarket = market;
+        if (market === 'IN') {
+          indianBtn.classList.add('active');
+          usBtn.classList.remove('active');
+        } else {
+          usBtn.classList.add('active');
+          indianBtn.classList.remove('active');
+        }
+        marketBadge.textContent = market;
+        // also update placeholder hint
+        symbolInput.placeholder = market === 'IN' ? 'e.g. STLTECH, RELIANCE' : 'e.g. AAPL, SONy';
+      }
+
+      indianBtn.addEventListener('click', () => setMarket('IN'));
+      usBtn.addEventListener('click', () => setMarket('US'));
+
+      // ---- initial sample data (from the attached JSON) ----
+      // This matches exactly the file content; we'll also update from fetch.
+      const sampleData = {
+        "symbol": "STLTECH",
+        "market": "IN",
+        "timestamp": "2026-11-10T15:45:59.626897+00:00",
+        "ml_prediction": {
+          "symbol": "STLTECH",
+          "accuracy": "58.86%",
+          "predicted_direction": "Up",
+          "prediction_confidence": "58.02%",
+          "news_integrated": false,
+          "latest_data": {
+            "Open": 687.0999755859375,
+            "High": 702.0,
+            "Low": 670.9500122070312,
+            "Close": 670.9500122070312,
+            "Volume": 2401096
+          },
+          "model_version": "v3.1_trio_ensemble_calibrated",
+          "horizon_days": 3,
+          "calibrated": true
+        },
+        "fusion_signal": {
+          "final_probability": 0.5562,
+          "recommendation": "HOLD",
+          "confidence": 0.1123,
+          "abstained": false,
+          "abstain_reasons": [],
+          "ml_prob": 0.5802,
+          "news_prob": 0.5,
+          "regime": 1
+        },
+        "agent_analysis": {
+          "agent_analysis_available": true,
+          "mode": "gemini_synthesizer (gemini-3.6-flash)",
+          "technical_signal": "UP",
+          "news_signal": "NEUTRAL",
+          "final_recommendation": "HOLD",
+          "reasoning": "The machine learning directional model indicates an upward trajectory with a moderate 58.02% confidence level. With zero news articles or corporate filings detected, the news impact score remains strictly neutral at 0.0. Given NIFTY50's slight upward momentum (+0.06%) alongside an elevated India VIX of 17.42, the meta-model synthesizes these signals into a prudent HOLD recommendation over the 3-day horizon.",
+          "macro_context": "NIFTY50 trend is up (0.06%). India VIX at 17.42.",
+          "risk_flags": "Elevated volatility (India VIX at 17.42) and absence of near-term fundamental catalysts.",
+          "news_impact_score": 0.0,
+          "top_catalysts": [],
+          "raw_analysis": "{\n  \"technical_signal\": \"UP\",\n  \"news_signal\": \"NEUTRAL\",\n  \"final_recommendation\": \"HOLD\",\n  \"reasoning\": \"The machine learning directional model indicates an upward trajectory with a moderate 58.02% confidence level. With zero news articles or corporate filings detected, the news impact score remains strictly neutral at 0.0. Given NIFTY50's slight upward momentum (+0.06%) alongside an elevated India VIX of 17.42, the meta-model synthesizes these signals into a prudent HOLD recommendation over the 3-day horizon.\",\n  \"macro_context\": \"NIFTY50 trend is up (0.06%). India VIX at 17.42.\",\n  \"risk_flags\": \"Elevated volatility (India VIX at 17.42) and absence of near-term fundamental catalysts.\",\n  \"news_impact_score\": 0.0,\n  \"top_catalysts\": []\n}",
+          "error": null,
+          "evidence_ids": [],
+          "source_urls": []
+        }
+      };
+
+      // ---- render function (takes data object) ----
+      function renderData(data) {
+        // safety: if data is missing fields, fallback to sample / placeholder
+        const ml = data?.ml_prediction || {};
+        const latest = ml?.latest_data || {};
+        const fusion = data?.fusion_signal || {};
+        const agent = data?.agent_analysis || {};
+
+        // symbol and market badge
+        if (data?.symbol) el.symbolDisplay.textContent = data.symbol;
+        else el.symbolDisplay.textContent = symbolInput.value.trim().toUpperCase() || '—';
+
+        if (data?.market) {
+          el.marketBadge.textContent = data.market;
+        } else {
+          el.marketBadge.textContent = currentMarket;
+        }
+
+        // recommendation
+        el.recommendation.textContent = fusion.recommendation || agent.final_recommendation || 'HOLD';
+
+        // OHLC
+        el.open.textContent = fmt2(latest.Open);
+        el.high.textContent = fmt2(latest.High);
+        el.low.textContent = fmt2(latest.Low);
+        el.close.textContent = fmt2(latest.Close);
+
+        // ML
+        el.mlDirection.textContent = ml.predicted_direction || '—';
+        el.mlConfidence.textContent = ml.prediction_confidence || '—';
+        el.horizon.textContent = (ml.horizon_days ? ml.horizon_days + ' days' : '—');
+
+        // fusion
+        el.finalProb.textContent = fusion.final_probability !== undefined ? fusion.final_probability.toFixed(4) : '—';
+        el.fusionConf.textContent = fusion.confidence !== undefined ? fusion.confidence.toFixed(4) : '—';
+        el.regime.textContent = fusion.regime !== undefined ? fusion.regime : '—';
+
+        // agent analysis
+        el.reasoning.textContent = agent.reasoning || 'No reasoning available.';
+        el.techSignal.textContent = agent.technical_signal || '—';
+        el.newsSignal.textContent = agent.news_signal || '—';
+
+        // extract VIX from macro_context (simple regex)
+        let vix = '17.42'; // default from sample
+        if (agent.macro_context) {
+          const match = agent.macro_context.match(/VIX\s*(?:at|:)?\s*([0-9.]+)/i);
+          if (match && match[1]) vix = match[1];
+        }
+        el.vixVal.textContent = vix;
+
+        el.riskFlags.textContent = agent.risk_flags || '—';
+
+        // timestamp
+        if (data?.timestamp) {
+          // simple pretty: take first 19 chars + Z
+          const ts = data.timestamp;
+          el.timestamp.textContent = ts.substring(0, 19).replace('T', ' ') + ' UTC';
+        } else {
+          el.timestamp.textContent = '—';
+        }
+
+        // update market badge also
+        if (data?.market) el.marketBadge.textContent = data.market;
+        else el.marketBadge.textContent = currentMarket;
+      }
+
+      // ---- fetch from API (mock but based on endpoint) ----
+      // Since we can't really call an external API in this demo, we simulate using the sample data
+      // but we respect the endpoint format: /stock/{market}/{symbol}
+      // In a real deployed scenario, replace the fetch with actual URL.
+      async function fetchStockData(market, symbol) {
+        // actual endpoint: /stock/${market}/${symbol}
+        // For demonstration, we return sample data but adjust symbol and market fields
+        // (because we don't have a backend, but we can simulate a successful response)
+        console.log(`GET /stock/${market}/${symbol}`);
+
+        // Simulate network delay
+        await new Promise(resolve => setTimeout(resolve, 400));
+
+        // deep clone sample and adapt
+        const adapted = JSON.parse(JSON.stringify(sampleData));
+        adapted.symbol = symbol.toUpperCase();
+        adapted.market = market;
+        adapted.timestamp = new Date().toISOString();
+        // keep other values mostly same, but adjust ml symbol
+        if (adapted.ml_prediction) adapted.ml_prediction.symbol = symbol.toUpperCase();
+        // Also tweak reasoning if symbol is different (just for realism)
+        if (symbol.toUpperCase() !== 'STLTECH') {
+          adapted.agent_analysis.reasoning = `Analysis for ${symbol.toUpperCase()} (${market}) shows neutral to mildly bullish signals. The ML model predicts an upward direction with moderate confidence. However, given current market volatility (VIX 17.42) and lack of specific catalysts, HOLD is advised.`;
+          adapted.agent_analysis.macro_context = `NIFTY50 trend is up (0.06%). India VIX at 17.42.`;
+        }
+
+        // if market is US, change a bit of flavour
+        if (market === 'US') {
+          adapted.ml_prediction.latest_data = {
+            Open: 175.50,
+            High: 178.20,
+            Low: 173.80,
+            Close: 174.30,
+            Volume: 12000000
+          };
+          adapted.fusion_signal.recommendation = 'HOLD';
+          adapted.agent_analysis.reasoning = `US equity ${symbol.toUpperCase()} shows moderate upward momentum but faces resistance. ML model indicates 58.02% confidence in upward move. With VIX at 17.42, we maintain a HOLD recommendation.`;
+          adapted.agent_analysis.macro_context = `S&P500 futures flat. VIX at 17.42.`;
+          adapted.agent_analysis.risk_flags = `Elevated volatility and mixed sector performance.`;
+        }
+
+        return adapted;
+      }
+
+      // ---- main action: fetch and render ----
+      async function loadStock() {
+        const symbolRaw = symbolInput.value.trim();
+        if (!symbolRaw) {
+          alert('Please enter a stock symbol');
+          return;
+        }
+        const symbol = symbolRaw.toUpperCase();
+
+        // set loading state
+        fetchBtn.disabled = true;
+        fetchBtn.innerHTML = '<span class="loader"></span> Loading';
+
+        try {
+          const data = await fetchStockData(currentMarket, symbol);
+          renderData(data);
+        } catch (error) {
+          console.error('Fetch error', error);
+          alert('Failed to fetch stock data. Please try again.');
+        } finally {
+          fetchBtn.disabled = false;
+          fetchBtn.innerHTML = '<i class="bi bi-search me-2"></i> Analyse';
+        }
+      }
+
+      // attach event
+      fetchBtn.addEventListener('click', loadStock);
+      symbolInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') loadStock();
+      });
+
+      // ---- on first load, render sample data (exactly from file) ----
+      renderData(sampleData);
+
+      // also set initial market badge from sample
+      setMarket('IN');   // sample is IN
+      // but ensure active toggle is correct
+      indianBtn.classList.add('active');
+      usBtn.classList.remove('active');
+    })();
+  </script>
+</body>
+</html>
