@@ -87,7 +87,7 @@
     const API_BASE = "https://finsage-production.up.railway.app";
 
     // ---- state ----
-    let currentMarket = 'IN';
+    let currentMarket = 'in';
     const indianBtn = document.getElementById('indianBtn');
     const usBtn = document.getElementById('usBtn');
     const symbolInput = document.getElementById('symbolInput');
@@ -97,12 +97,12 @@
 
     function setMarket(market) {
       currentMarket = market;
-      indianBtn.classList.toggle('active', market === 'IN');
-      usBtn.classList.toggle('active', market === 'US');
-      symbolInput.placeholder = market === 'IN' ? 'e.g. STLTECH, RELIANCE' : 'e.g. AAPL, MSFT';
+      indianBtn.classList.toggle('active', market === 'in');
+      usBtn.classList.toggle('active', market === 'us');
+      symbolInput.placeholder = market === 'in' ? 'e.g. STLTECH, RELIANCE' : 'e.g. AAPL, MSFT';
     }
-    indianBtn.addEventListener('click', () => setMarket('IN'));
-    usBtn.addEventListener('click', () => setMarket('US'));
+    indianBtn.addEventListener('click', () => setMarket('in'));
+    usBtn.addEventListener('click', () => setMarket('us'));
 
     const fmt2 = (n) => (n !== undefined && n !== null && n !== '') ? Number(n).toFixed(2) : '—';
     const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -182,7 +182,7 @@
     }
 
     async function loadStock() {
-      const symbol = symbolInput.value.trim().toUpperCase();
+      const symbol = symbolInput.value.trim().toLowerCase();
       if (!symbol) { showError('Please enter a stock symbol.'); return; }
       if (!API_BASE) { showError('API_BASE is not configured. Set it in the script.'); return; }
 
